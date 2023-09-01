@@ -380,6 +380,9 @@ router.post("/MarkShipment", (req, res) => {
 /* GET orders/order-history.hbs page . */
 router.get("/order-history", verifyLogin, (req, res, next) => {
   adminOrderController.fetchAllOrders().then((AllOrders) => {
+    AllOrders.map(async(order)=>{
+      order.Order_Date=await dateConvert.convertDate(order.Order_Date)
+    })
     res.render("admin/Admin-orders/order-history", {
       AllOrders,
       AdminData: req.session.admin,

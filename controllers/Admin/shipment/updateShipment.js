@@ -24,7 +24,7 @@ module.exports = updateShipment = (Data) => {
               { Order_no: Data.orderNo },
               {
                 $set: {
-                  "Payment.PaidAmount": Order.Total_Amount,
+                  "Payment.PaidAmount": parseInt(Order.Total_Amount),
                   "Payment.Amount_due": 0,
                 },
               }

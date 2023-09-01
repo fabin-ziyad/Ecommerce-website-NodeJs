@@ -14,7 +14,7 @@ module.exports = changePaymentStatus = (orderId, userId) => {
             $set: {
               "Payment.Payment_Method": "Online",
               "Payment.PaymentId": orderId["response[razorpay_payment_id]"],
-              "Payment.PaidAmount": parseInt(orderId["order[amount]"]) * 100,
+              "Payment.PaidAmount": parseInt(orderId["order[amount]"])/100,
               "Payment.status": orderId["order[status]"],
               "Payment.created_at": new Date(Date.now()),
             },

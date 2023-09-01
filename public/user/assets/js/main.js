@@ -1170,8 +1170,10 @@ function razorpayPayment(order) {
       name: order.customerName, 
       email: order.customerMail,
       contact: order.customerPhone, 
+      amount:order.amount
     },
     handler:  (response)=> {
+      console.log(response)
       verifyPayment(response,order)
     },
     notes: {

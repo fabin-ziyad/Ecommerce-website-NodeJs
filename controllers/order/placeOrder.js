@@ -2,9 +2,10 @@ const db = require("../../config/connection");
 const collection = require("../../config/collection");
 const ObjectId = require("mongodb").ObjectId;
 const RemoveFromCartAfterOrder = require("../cart-wishlists/clearCart");
-const fecthUserDetails=require('../../common-functions/getUserDetails')
+const fecthUserDetails = require("../../common-functions/getUserDetails");
 const { v4: uuidv4 } = require("uuid");
 const fetchUserCart = require("../../common-functions/fetchUserCart");
+const changePaymentStatus = require("./togglePaymentStatus");
 module.exports = placeOrder = (UserId, ReqData) => {
   let order_Id;
   return new Promise(async (resolve, reject) => {
@@ -27,8 +28,10 @@ module.exports = placeOrder = (UserId, ReqData) => {
         Payment_Method: ReqData.method,
         PaymentId: ReqData.receiptId === null ? "NA" : ReqData.receiptId,
         Amount_to_be_Paid: parseInt(ReqData.TotalAmount),
-        PaidAmount: ReqData.method ==="COD" ? "At the time of Delivery": "Pending",
-        Amount_due: ReqData.method ==="COD" ? parseInt(ReqData.TotalAmount) : 0,
+        PaidAmount:
+          ReqData.method === "COD" ? parseInt(ReqData.TotalAmount) : 0,
+        Amount_due:
+          ReqData.method === "COD" ? parseInt(ReqData.TotalAmount) : 0,
         status: "Created",
         created_at: new Date(Date.now()),
       },
@@ -45,8 +48,8 @@ module.exports = placeOrder = (UserId, ReqData) => {
         .collection(collection.ORDER_COLLECTION)
         .insertOne(Data_to_insert)
         .then(async (response) => {
-            if (response.insertedId) {
-              await RemoveFromCartAfterOrder(UserData._id);
+          if (response.insertedId) {
+            await RemoveFromCartAfterOrder(UserData._id);
             order_Id = response.insertedId;
             let shipmentData = {
               Order: response.insertedId,
@@ -56,6 +59,7 @@ module.exports = placeOrder = (UserId, ReqData) => {
               ExpectedDelivery: "Na",
               updatedAt: new Date(Date.now()),
             };
+            await changePaymentStatus(order_Id, UserId);
             // Shipment updation
             await db
               .get()
